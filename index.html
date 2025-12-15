@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMOUR* ET CHEVEUX BLANCS - Générateur de BD</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: 'Crimson Text', Georgia, serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        // ============================================================
+        // CONFIGURATION - MODIFIE CETTE URL AVEC TON URL GITHUB PAGES
+        // ============================================================
+        const BASE_URL = 'https://Cowkiller.github.io/generateur-bd';
+        // ============================================================
+
+        // Base de données des dessins
+        const DESSINS_DATA = [
+          {
+            id: '001',
+            nom: '001 - Le test de grossesse',
+            fichier: '001-Test_de_grossesse.png',
+            titre: 'Le test de grossesse',
+            dialogue: '- JE PARTAGE TON ENTHOUSIASME CHÉRI, MAIS TU DEVRAIS PAS EMBRASSER LE TEST DE GROSSESSE COMME ÇA!'
+          },
+          {
+            id: '003',
+            nom: '003 - La reprise',
+            fichier: '003-La_reprise.png',
+            titre: 'La reprise',
+            dialogue: '- DIS-DONC, IL A L\'AIR FATIGUÉ DUFLANTIER!\n- IL REVIENT JUSTE DE CONGÉS PATERNITÉ.\n- OH! C\'EST POUR ÇA QU\'IL NOUS APPELAIT TOUS "MON P\'TIT CHAT"!'
+          },
+          {
+            id: '004',
+            nom: '004 - Les dessins',
+            fichier: '004-Les_dessins.png',
+            titre: 'les dessins',
+            dialogue: '- C\'EST PAS QU\'ON VEUILLE BRIDER TA PASSION ARTISTIQUE, MAIS ON N\'EST PEUT-ÊTRE PAS OBLIGÉ DE TOUS LES AFFICHER?\n- ON N\'EN PEUT PLUS DE TES DESSINS POURRIS TIMOTHY!!!'
+          },
+          {
+            id: '006',
+            nom: '006 - Le prénom',
+            fichier: '006-Le_prénom.png',
+            titre: 'le prénom',
+            dialogue: '- 3 PRÉNOMS SUR UN POST-IT, J\'APPELLE PAS ÇA UNE LISTE PATRICK !\n- ET TU PEUX ME DIRE POURQUOI JE NE TROUVE PAS "GANDALF" DANS TA LISTE POURTANT TRÈS LONGUE, SUSANNE ?!?'
+          },
+          {
+            id: '012',
+            nom: '012 - Le faire-part',
+            fichier: '012-le_faire-part.png',
+            titre: 'le faire-part',
+            dialogue: '- NON THOMAS, ON NE PEUT PAS DIRE QU\'ON REGRETTE SUR UN FAIRE-PART DE NAISSANCE !!!\n- MAIS ON SE DOIT DE PRÉVENIR LES FUTURS-PARENTS NON??\n...\nOU ALORS ON LE MET EN TOUT PETIT?'
+          },
+          {
+            id: '024',
+            nom: '024 - Le guet-apens',
+            fichier: '024-le_guet-apens.png',
+            titre: 'le guet-apens',
+            dialogue: '- PRÉSIDENT ! PRÉSIDENT ! PRÉSIDENT !\n- JE SAIS BIEN QUE JE DEVAIS JUSTE OBSERVER CHÉRIE... JE NE COMPRENDS PAS CE QU\'IL S\'EST PASSÉ !'
+          },
+          {
+            id: '042',
+            nom: '042 - La négociation',
+            fichier: '042 - la Négociation .png',
+            titre: 'la négociation',
+            dialogue: '- ALLEZ MON LOULOU, JE M\'EXCUSE D\'AVOIR TIRÉ LA CHASSE À TA PLACE... ET SI ON DIT QUE LA PROCHAINE FOIS QUE JE FAIS CACA, C\'EST TOI QUI FAIS, ÇA VA MIEUX ?'
+          },
+          {
+            id: 'wa1',
+            nom: 'La rancune',
+            fichier: 'WhatsApp_Image_2025-12-04_at_17_17_40.jpeg',
+            titre: 'la rancune',
+            dialogue: '- PAPAAA !?! MAIS POURQUOI TU M\'EMPÊCHES DE DORMIR TOUS LES DIMANCHES MATIN ???\n- C\'EST EXACTEMENT LA MÊME QUESTION QUE JE T\'AI POSÉE, CHAQUE WEEK-END, JUSQU\'À TES 7 ANS.'
+          },
+          {
+            id: 'wa2',
+            nom: 'La bagarre',
+            fichier: 'WhatsApp_Image_2025-12-04_at_17_17_41__1_.jpeg',
+            titre: 'la bagarre',
+            dialogue: '- OH MON DIEU ! MAIS QU\'EST-CE QU\'IL T\'ES ARRIVÉ SIMON? UN ACCIDENT DE VOITURE ? UNE BAGARRE ?\n- NON NON. J\'AI JUSTE PASSÉ LA NUIT DANS LE MÊME LIT QUE LUKE...'
+          },
+          {
+            id: 'wa3',
+            nom: 'La purée',
+            fichier: 'WhatsApp_Image_2025-12-04_at_17_17_43__1_.jpeg',
+            titre: 'la purée',
+            dialogue: '- ... À TES SOUHAITS.'
+          }
+        ];
+    </script>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        function BDGenerator() {
+          const [titre, setTitre] = useState('');
+          const [dialogue, setDialogue] = useState('');
+          const [signatureUser, setSignatureUser] = useState('');
+          const [dessinImage, setDessinImage] = useState(null);
+          const [cadreImage, setCadreImage] = useState(null);
+          const [selectedDessinId, setSelectedDessinId] = useState('');
+          const [fontLoaded, setFontLoaded] = useState(false);
+          const [mirrorHorizontal, setMirrorHorizontal] = useState(false);
+          const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+          const canvasRef = useRef(null);
+
+          // Palette sombre AMOUR*
+          const colors = {
+            rose: '#E8728A',              // Rose principal (accent)
+            roseClair: '#F5A3B5',         // Rose clair pour hover/accents secondaires
+            fondPrincipal: '#1a1a2e',     // Bleu très foncé
+            fondSecondaire: '#16213e',    // Bleu foncé
+            fondTertiaire: '#0f3460',     // Bleu nuit
+            panneauFond: 'rgba(255, 255, 255, 0.05)',  // Fond semi-transparent
+            bordure: 'rgba(232, 114, 138, 0.3)',      // Bordure rose subtile
+            texte: '#f0e6d3',             // Texte crème
+            texteClair: '#ffffff',        // Texte blanc
+            inputFond: 'rgba(0, 0, 0, 0.3)',  // Fond des inputs
+            inputBordure: 'rgba(232, 114, 138, 0.4)'  // Bordure des inputs
+          };
+
+          // Détecter le redimensionnement
+          useEffect(() => {
+            const handleResize = () => setIsMobile(window.innerWidth < 768);
+            window.addEventListener('resize', handleResize);
+            return () => window.removeEventListener('resize', handleResize);
+          }, []);
+
+          // Charger les polices
+          useEffect(() => {
+            const loadFonts = async () => {
+              try {
+                const comicFont = new FontFace('ComicNoteSmooth', `url(${BASE_URL}/ComicNoteSmooth.ttf)`);
+                await comicFont.load();
+                document.fonts.add(comicFont);
+                
+                const fragmentFont = new FontFace('Fragmentcore', `url(${BASE_URL}/Fragmentcore.otf)`);
+                await fragmentFont.load();
+                document.fonts.add(fragmentFont);
+                
+                setFontLoaded(true);
+              } catch (error) {
+                console.error('Erreur polices:', error);
+                setFontLoaded(true);
+              }
+            };
+            loadFonts();
+          }, []);
+
+          // Charger le cadre
+          useEffect(() => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => setCadreImage(img);
+            img.src = `${BASE_URL}/cadre.png`;
+          }, []);
+
+          // Sélection d'un dessin
+          const handleDessinSelect = (e) => {
+            const dessinId = e.target.value;
+            setSelectedDessinId(dessinId);
+            
+            if (!dessinId) {
+              setTitre('');
+              setDialogue('');
+              setDessinImage(null);
+              return;
+            }
+            
+            const dessin = DESSINS_DATA.find(d => d.id === dessinId);
+            if (dessin) {
+              setTitre(dessin.titre);
+              setDialogue(dessin.dialogue);
+              
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              img.onload = () => setDessinImage(img);
+              img.onerror = () => console.error('Erreur chargement:', dessin.fichier);
+              img.src = `${BASE_URL}/img/${dessin.fichier}`;
+            }
+          };
+
+          // Découper le texte en lignes
+          const wrapText = (ctx, text, maxWidth) => {
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+            
+            words.forEach(word => {
+              const testLine = currentLine + (currentLine ? ' ' : '') + word;
+              const metrics = ctx.measureText(testLine);
+              if (metrics.width > maxWidth && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            });
+            if (currentLine) lines.push(currentLine);
+            return lines;
+          };
+
+          // Dessiner le dessin (avec ou sans miroir)
+          const drawDessin = (ctx, width, height, applyMirror) => {
+            if (!dessinImage) return;
+            
+            const imgRatio = dessinImage.width / dessinImage.height;
+            const boxRatio = width / height;
+            
+            let finalWidth, finalHeight, finalX, finalY;
+            
+            if (imgRatio > boxRatio) {
+              finalWidth = width;
+              finalHeight = width / imgRatio;
+              finalX = 0;
+              finalY = (height - finalHeight) / 2;
+            } else {
+              finalHeight = height;
+              finalWidth = height * imgRatio;
+              finalX = (width - finalWidth) / 2;
+              finalY = 0;
+            }
+            
+            if (applyMirror) {
+              ctx.save();
+              ctx.translate(width, 0);
+              ctx.scale(-1, 1);
+              ctx.drawImage(dessinImage, width - finalX - finalWidth, finalY, finalWidth, finalHeight);
+              ctx.restore();
+            } else {
+              ctx.drawImage(dessinImage, finalX, finalY, finalWidth, finalHeight);
+            }
+          };
+
+          // Dessiner l'aperçu
+          useEffect(() => {
+            if (!fontLoaded) return;
+            
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = 1024;
+            const height = 1024;
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            
+            drawDessin(ctx, width, height, mirrorHorizontal);
+            
+            if (cadreImage) {
+              ctx.drawImage(cadreImage, 0, 0, width, height);
+            }
+            
+            // Titre avec rectangle blanc
+            ctx.font = '34px Fragmentcore, Georgia, serif';
+            ctx.textAlign = 'center';
+            
+            const maxTitreWidth = 400;
+            const titreMetrics = ctx.measureText(titre);
+            const padding = 8; // Marge autour du texte
+            const titreCenterX = 735;
+            
+            if (titre.trim()) {
+              if (titreMetrics.width > maxTitreWidth) {
+                  const words = titre.split(' ');
+                  let ligne1 = '';
+                  let ligne2 = '';
+                  
+                  for (let i = 0; i < words.length; i++) {
+                      const testLine = ligne1 + (ligne1 ? ' ' : '') + words[i];
+                      if (ctx.measureText(testLine).width <= maxTitreWidth) {
+                          ligne1 = testLine;
+                      } else {
+                          ligne2 = words.slice(i).join(' ');
+                          break;
+                      }
+                  }
+                  
+                  if (!ligne2 && ligne1 === titre) {
+                      const mid = Math.ceil(words.length / 2);
+                      ligne1 = words.slice(0, mid).join(' ');
+                      ligne2 = words.slice(mid).join(' ');
+                  }
+                  
+                  // Calculer la largeur du rectangle (max des 2 lignes)
+                  const ligne1Width = ctx.measureText(ligne1).width;
+                  const ligne2Width = ctx.measureText(ligne2).width;
+                  const rectWidth = Math.max(ligne1Width, ligne2Width) + padding * 2;
+                  const rectHeight = 34 * 2 + padding * 2; // 2 lignes de 34px + padding
+                  const rectX = titreCenterX - rectWidth / 2;
+                  const rectY = 43 - 34 + padding / 2 - padding; // Ajusté pour la première ligne
+                  
+                  // Dessiner le rectangle blanc
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
+                  
+                  // Dessiner le texte
+                  ctx.fillStyle = '#000000';
+                  ctx.fillText(ligne1, titreCenterX, 43);
+                  ctx.fillText(ligne2, titreCenterX, 75);
+              } else {
+                  // Une seule ligne
+                  const rectWidth = titreMetrics.width + padding * 2;
+                  const rectHeight = 34 + padding * 2;
+                  const rectX = titreCenterX - rectWidth / 2;
+                  const rectY = 58 - 34 + padding / 2 - padding;
+                  
+                  // Dessiner le rectangle blanc
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
+                  
+                  // Dessiner le texte
+                  ctx.fillStyle = '#000000';
+                  ctx.fillText(titre, titreCenterX, 58);
+              }
+            }
+
+            // Dialogue
+            ctx.font = '40px ComicNoteSmooth, Arial, sans-serif';
+            ctx.textAlign = 'left';
+            
+            const dialogueLines = [];
+            const explicitLines = dialogue.split('\n');
+            const maxWidth = width - 60;
+            
+            explicitLines.forEach(explicitLine => {
+              const wrappedLines = wrapText(ctx, explicitLine, maxWidth);
+              dialogueLines.push(...wrappedLines);
+            });
+            
+            const dialogueY = height - 175;
+            const lineHeight = 30;
+            dialogueLines.forEach((line, i) => {
+              ctx.fillText(line, 30, dialogueY + i * lineHeight);
+            });
+            
+            // Signature utilisateur (à gauche de la signature TRCK intégrée au cadre)
+            if (signatureUser.trim()) {
+              ctx.font = '32px Dancing Script, cursive';
+              ctx.textAlign = 'right';
+              ctx.fillStyle = '#000000';
+              // Position à gauche de "TRCK" : environ 90px de marge pour "et TRCK"
+              const signatureText = signatureUser.trim() + ' et';
+              ctx.fillText(signatureText, width - 115, height - 11);
+            }
+            
+          }, [dessinImage, cadreImage, titre, dialogue, signatureUser, fontLoaded, mirrorHorizontal]);
+
+          // Exporter en PNG
+          const exporterPNG = () => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            
+            try {
+              const exportCanvas = document.createElement('canvas');
+              const exportCtx = exportCanvas.getContext('2d');
+              const width = 1024;
+              const height = 1024;
+              
+              exportCanvas.width = width;
+              exportCanvas.height = height;
+              
+              exportCtx.fillStyle = '#ffffff';
+              exportCtx.fillRect(0, 0, width, height);
+              
+              if (dessinImage) {
+                const imgRatio = dessinImage.width / dessinImage.height;
+                const boxRatio = width / height;
+                
+                let finalWidth, finalHeight, finalX, finalY;
+                
+                if (imgRatio > boxRatio) {
+                  finalWidth = width;
+                  finalHeight = width / imgRatio;
+                  finalX = 0;
+                  finalY = (height - finalHeight) / 2;
+                } else {
+                  finalHeight = height;
+                  finalWidth = height * imgRatio;
+                  finalX = (width - finalWidth) / 2;
+                  finalY = 0;
+                }
+                
+                if (mirrorHorizontal) {
+                  exportCtx.save();
+                  exportCtx.translate(width, 0);
+                  exportCtx.scale(-1, 1);
+                  exportCtx.drawImage(dessinImage, width - finalX - finalWidth, finalY, finalWidth, finalHeight);
+                  exportCtx.restore();
+                } else {
+                  exportCtx.drawImage(dessinImage, finalX, finalY, finalWidth, finalHeight);
+                }
+              }
+              
+              if (cadreImage) {
+                exportCtx.drawImage(cadreImage, 0, 0, width, height);
+              }
+              
+              // Titre avec rectangle blanc
+              exportCtx.font = '34px Fragmentcore, Georgia, serif';
+              exportCtx.textAlign = 'center';
+              
+              const maxTitreWidth = 400;
+              const titreMetrics = exportCtx.measureText(titre);
+              const padding = 8; // Marge autour du texte
+              const titreCenterX = 735;
+              
+              if (titre.trim()) {
+                if (titreMetrics.width > maxTitreWidth) {
+                  const words = titre.split(' ');
+                  let ligne1 = '';
+                  let ligne2 = '';
+                  
+                  for (let i = 0; i < words.length; i++) {
+                    const testLine = ligne1 + (ligne1 ? ' ' : '') + words[i];
+                    if (exportCtx.measureText(testLine).width <= maxTitreWidth) {
+                      ligne1 = testLine;
+                    } else {
+                      ligne2 = words.slice(i).join(' ');
+                      break;
+                    }
+                  }
+                  
+                  if (!ligne2 && ligne1 === titre) {
+                    const mid = Math.ceil(words.length / 2);
+                    ligne1 = words.slice(0, mid).join(' ');
+                    ligne2 = words.slice(mid).join(' ');
+                  }
+                  
+                  // Calculer la largeur du rectangle (max des 2 lignes)
+                  const ligne1Width = exportCtx.measureText(ligne1).width;
+                  const ligne2Width = exportCtx.measureText(ligne2).width;
+                  const rectWidth = Math.max(ligne1Width, ligne2Width) + padding * 2;
+                  const rectHeight = 34 * 2 + padding * 2; // 2 lignes de 34px + padding
+                  const rectX = titreCenterX - rectWidth / 2;
+                  const rectY = 43 - 34 + padding / 2 - padding; // Ajusté pour la première ligne
+                  
+                  // Dessiner le rectangle blanc
+                  exportCtx.fillStyle = '#ffffff';
+                  exportCtx.fillRect(rectX, rectY, rectWidth, rectHeight);
+                  
+                  // Dessiner le texte
+                  exportCtx.fillStyle = '#000000';
+                  exportCtx.fillText(ligne1, titreCenterX, 43);
+                  exportCtx.fillText(ligne2, titreCenterX, 75);
+                } else {
+                  // Une seule ligne
+                  const rectWidth = titreMetrics.width + padding * 2;
+                  const rectHeight = 34 + padding * 2;
+                  const rectX = titreCenterX - rectWidth / 2;
+                  const rectY = 58 - 34 + padding / 2 - padding;
+                  
+                  // Dessiner le rectangle blanc
+                  exportCtx.fillStyle = '#ffffff';
+                  exportCtx.fillRect(rectX, rectY, rectWidth, rectHeight);
+                  
+                  // Dessiner le texte
+                  exportCtx.fillStyle = '#000000';
+                  exportCtx.fillText(titre, titreCenterX, 58);
+                }
+              }
+              
+              // Dialogue
+              exportCtx.font = '40px ComicNoteSmooth, Arial, sans-serif';
+              exportCtx.textAlign = 'left';
+              
+              const dialogueLines = [];
+              const explicitLines = dialogue.split('\n');
+              const maxWidth = width - 60;
+              
+              explicitLines.forEach(explicitLine => {
+                const wrappedLines = wrapText(exportCtx, explicitLine, maxWidth);
+                dialogueLines.push(...wrappedLines);
+              });
+              
+              const dialogueY = height - 175;
+              const lineHeight = 30;
+              dialogueLines.forEach((line, i) => {
+                exportCtx.fillText(line, 30, dialogueY + i * lineHeight);
+              });
+              
+              // Signature utilisateur (à gauche de la signature TRCK intégrée au cadre)
+              if (signatureUser.trim()) {
+                exportCtx.font = '32px Dancing Script, cursive';
+                exportCtx.textAlign = 'right';
+                exportCtx.fillStyle = '#000000';
+                // Position à gauche de "TRCK" : environ 90px de marge pour "et TRCK"
+                const signatureText = signatureUser.trim() + ' et';
+                exportCtx.fillText(signatureText, width - 115, height - 11);
+              }
+              
+              exportCanvas.toBlob((blob) => {
+                if (!blob) return;
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const filename = titre.replace(/[^a-zA-Z0-9àâäéèêëïîôùûüç]/gi, '_') || 'bd_amour';
+                link.download = `${filename}.png`;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+              }, 'image/png');
+            } catch (error) {
+              console.error('Erreur export:', error);
+              alert('Erreur lors de l\'export.');
+            }
+          };
+
+          // Styles responsive - Thème sombre AMOUR*
+          const styles = {
+            container: {
+              minHeight: '100vh',
+              background: `linear-gradient(135deg, ${colors.fondPrincipal} 0%, ${colors.fondSecondaire} 50%, ${colors.fondTertiaire} 100%)`,
+              fontFamily: "'Crimson Text', Georgia, serif",
+              color: colors.texte,
+              padding: 0
+            },
+            headerBanner: {
+              width: '100%',
+              background: colors.fondPrincipal,
+              padding: isMobile ? '15px 0 10px' : '25px 0 15px',
+              textAlign: 'center',
+              borderBottom: `1px solid ${colors.bordure}`
+            },
+            bannerImage: {
+              maxWidth: isMobile ? '90%' : '600px',
+              height: 'auto',
+              display: 'block',
+              margin: '0 auto'
+            },
+            subtitleBar: {
+              background: colors.rose,
+              color: colors.texteClair,
+              padding: isMobile ? '8px 15px' : '12px 20px',
+              textAlign: 'center',
+              fontSize: isMobile ? '0.75rem' : '1rem',
+              letterSpacing: '0.15em',
+              fontWeight: '600',
+              textTransform: 'uppercase'
+            },
+            mainContent: {
+              padding: isMobile ? '20px 15px' : '40px 30px'
+            },
+            mainGrid: {
+              maxWidth: '1400px',
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: isMobile ? '20px' : '40px',
+              alignItems: 'start'
+            },
+            panel: {
+              background: colors.panneauFond,
+              borderRadius: isMobile ? '15px' : '20px',
+              padding: isMobile ? '20px' : '35px',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${colors.bordure}`,
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              width: '100%',
+              flex: isMobile ? 'none' : 1
+            },
+            apercuPanel: {
+              background: colors.panneauFond,
+              borderRadius: isMobile ? '15px' : '20px',
+              padding: isMobile ? '15px' : '35px',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${colors.bordure}`,
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              width: '100%',
+              flex: isMobile ? 'none' : 1
+            },
+            sectionTitle: {
+              fontSize: isMobile ? '1.2rem' : '1.5rem',
+              fontWeight: '600',
+              marginTop: 0,
+              marginBottom: isMobile ? '20px' : '30px',
+              paddingBottom: '15px',
+              borderBottom: `2px solid ${colors.rose}`,
+              color: colors.rose,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            },
+            logoSmall: {
+              width: isMobile ? '32px' : '40px',
+              height: isMobile ? '32px' : '40px'
+            },
+            label: {
+              display: 'block',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: isMobile ? '8px' : '12px',
+              color: colors.roseClair,
+              fontWeight: '600'
+            },
+            select: {
+              width: '100%',
+              padding: isMobile ? '12px 14px' : '15px 18px',
+              fontSize: '16px',
+              fontFamily: "'Crimson Text', Georgia, serif",
+              background: colors.inputFond,
+              border: `2px solid ${colors.inputBordure}`,
+              borderRadius: '10px',
+              color: colors.texte,
+              outline: 'none',
+              cursor: 'pointer',
+              boxSizing: 'border-box',
+              appearance: 'none',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23E8728A' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 15px center',
+              transition: 'border-color 0.3s ease'
+            },
+            input: {
+              width: '100%',
+              padding: isMobile ? '12px 14px' : '15px 18px',
+              fontSize: '16px',
+              fontFamily: "'Crimson Text', Georgia, serif",
+              fontStyle: 'italic',
+              background: colors.inputFond,
+              border: `2px solid ${colors.inputBordure}`,
+              borderRadius: '10px',
+              color: colors.texte,
+              outline: 'none',
+              boxSizing: 'border-box',
+              transition: 'border-color 0.3s ease'
+            },
+            textarea: {
+              width: '100%',
+              padding: isMobile ? '12px 14px' : '15px 18px',
+              fontSize: '16px',
+              fontFamily: "'Arial', sans-serif",
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              background: colors.inputFond,
+              border: `2px solid ${colors.inputBordure}`,
+              borderRadius: '10px',
+              color: colors.texte,
+              outline: 'none',
+              resize: 'vertical',
+              lineHeight: '1.5',
+              boxSizing: 'border-box',
+              transition: 'border-color 0.3s ease'
+            },
+            checkboxLabel: {
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              color: colors.texte,
+              padding: isMobile ? '8px 0' : '0'
+            },
+            checkbox: {
+              width: isMobile ? '24px' : '20px',
+              height: isMobile ? '24px' : '20px',
+              marginRight: '12px',
+              cursor: 'pointer',
+              accentColor: colors.rose
+            },
+            checkboxText: {
+              fontSize: isMobile ? '0.85rem' : '0.9rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: colors.roseClair,
+              fontWeight: '600'
+            },
+            button: {
+              width: '100%',
+              padding: isMobile ? '16px 20px' : '16px 24px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              background: dessinImage ? `linear-gradient(135deg, ${colors.rose}, ${colors.roseClair})` : 'rgba(100, 100, 100, 0.3)',
+              border: 'none',
+              borderRadius: '12px',
+              color: dessinImage ? colors.texteClair : '#666',
+              cursor: dessinImage ? 'pointer' : 'not-allowed',
+              boxShadow: dessinImage ? '0 4px 20px rgba(232, 114, 138, 0.4)' : 'none',
+              transition: 'all 0.3s ease',
+              WebkitTapHighlightColor: 'transparent'
+            },
+            canvasContainer: {
+              background: colors.texteClair,
+              borderRadius: isMobile ? '8px' : '12px',
+              padding: isMobile ? '5px' : '10px',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.4)'
+            },
+            canvas: {
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+              borderRadius: isMobile ? '6px' : '8px'
+            },
+            placeholder: {
+              textAlign: 'center',
+              marginTop: isMobile ? '15px' : '20px',
+              opacity: 0.7,
+              fontStyle: 'italic',
+              fontSize: isMobile ? '0.9rem' : '1rem',
+              color: colors.roseClair
+            },
+            footer: {
+              textAlign: 'center',
+              marginTop: isMobile ? '25px' : '40px',
+              padding: '30px 20px',
+              background: `linear-gradient(180deg, transparent 0%, rgba(232, 114, 138, 0.15) 100%)`,
+              borderTop: `1px solid ${colors.bordure}`,
+              color: colors.texte,
+              fontSize: isMobile ? '0.8rem' : '0.95rem'
+            },
+            footerLogo: {
+              width: '50px',
+              height: '50px',
+              marginBottom: '10px'
+            },
+            fieldGroup: {
+              marginBottom: isMobile ? '20px' : '25px'
+            }
+          };
+
+          // Panneau Aperçu (en premier sur mobile)
+          const apercuContent = (
+            <div style={styles.apercuPanel}>
+              <h2 style={styles.sectionTitle}>
+                <img src="Love_Logo_Rose__Blanc_et_Trans_Rond.png" alt="" style={styles.logoSmall} />
+                Aperçu
+              </h2>
+              <div style={styles.canvasContainer}>
+                <canvas ref={canvasRef} style={styles.canvas} />
+              </div>
+              {!dessinImage && (
+                <p style={styles.placeholder}>
+                  {isMobile ? '👇 Choisissez un dessin ci-dessous' : '← Sélectionnez un dessin pour voir l\'aperçu'}
+                </p>
+              )}
+            </div>
+          );
+
+          // Panneau Contrôles
+          const controlContent = (
+            <div style={styles.panel}>
+              <h2 style={styles.sectionTitle}>
+                <img src="Love_Logo_Rose__Blanc_et_Trans_Rond.png" alt="" style={styles.logoSmall} />
+                Édition
+              </h2>
+
+              {/* Sélection du dessin */}
+              <div style={styles.fieldGroup}>
+                <label style={styles.label}>🎨 Sélectionner un dessin</label>
+                <select
+                  value={selectedDessinId}
+                  onChange={handleDessinSelect}
+                  style={styles.select}
+                >
+                  <option value="">-- Choisir un dessin --</option>
+                  {DESSINS_DATA.map(dessin => (
+                    <option key={dessin.id} value={dessin.id} style={{ background: colors.fondPrincipal, color: colors.texte }}>
+                      {dessin.nom}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Miroir horizontal */}
+              <div style={styles.fieldGroup}>
+                <label style={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={mirrorHorizontal}
+                    onChange={(e) => setMirrorHorizontal(e.target.checked)}
+                    style={styles.checkbox}
+                  />
+                  <span style={styles.checkboxText}>🔄 Miroir horizontal</span>
+                </label>
+              </div>
+
+              {/* Titre */}
+              <div style={styles.fieldGroup}>
+                <label style={styles.label}>✏️ Titre de l'anecdote</label>
+                <input
+                  type="text"
+                  value={titre}
+                  onChange={(e) => setTitre(e.target.value)}
+                  style={styles.input}
+                />
+              </div>
+
+              {/* Dialogue */}
+              <div style={styles.fieldGroup}>
+                <label style={styles.label}>💬 Dialogue</label>
+                <textarea
+                  value={dialogue}
+                  onChange={(e) => setDialogue(e.target.value)}
+                  rows={isMobile ? 4 : 5}
+                  style={styles.textarea}
+                />
+              </div>
+
+              {/* Signature */}
+              <div style={styles.fieldGroup}>
+                <label style={styles.label}>🖊️ Votre signature (optionnel)</label>
+                <input
+                  type="text"
+                  value={signatureUser}
+                  onChange={(e) => setSignatureUser(e.target.value)}
+                  placeholder="Ex: Marie"
+                  style={{...styles.input, fontFamily: "'Dancing Script', cursive", fontStyle: 'normal', fontSize: '18px'}}
+                />
+                <div style={{fontSize: '0.75rem', marginTop: '6px', opacity: 0.7, color: colors.roseClair}}>
+                  {signatureUser.trim() ? `Aperçu : "${signatureUser} et TRCK"` : 'Sans signature : "TRCK"'}
+                </div>
+              </div>
+
+              {/* Bouton export */}
+              <div>
+                <button
+                  onClick={exporterPNG}
+                  disabled={!dessinImage}
+                  style={styles.button}
+                >
+                  📥 Exporter PNG
+                </button>
+              </div>
+            </div>
+          );
+
+          return (
+            <div style={styles.container}>
+              {/* En-tête avec bannière */}
+              <header style={styles.headerBanner}>
+                <img 
+                  src="Amour_Titre_ET_colo_kofi.png" 
+                  alt="AMOUR* ET CHEVEUX BLANCS" 
+                  style={styles.bannerImage}
+                />
+              </header>
+              
+              {/* Barre sous-titre 
+              <div style={styles.subtitleBar}>
+                Générateur de BD
+              </div>*/}
+
+              {/* Contenu principal */}
+              <div style={styles.mainContent}>
+                <div style={styles.mainGrid}>
+                  {isMobile ? (
+                    <>
+                      {apercuContent}
+                      {controlContent}
+                    </>
+                  ) : (
+                    <>
+                      {controlContent}
+                      {apercuContent}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <footer style={styles.footer}>
+                <img 
+                  src="Love_Logo_Rose__Blanc_et_Trans_Rond.png" 
+                  alt="" 
+                  style={styles.footerLogo}
+                />
+                <div style={{ color: colors.rose, fontWeight: '600', fontSize: '1.1rem' }}>AMOUR* ET CHEVEUX BLANCS</div>
+                <div style={{ opacity: 0.8, marginTop: '8px', fontSize: '0.9rem' }}>
+                  Une BD sur le joyeux chaos de la parentalité
+                </div>
+              </footer>
+            </div>
+          );
+        }
+
+        ReactDOM.render(<BDGenerator />, document.getElementById('root'));
+    </script>
+</body>
+</html>
