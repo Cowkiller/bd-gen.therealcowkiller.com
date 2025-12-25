@@ -936,11 +936,18 @@
             fieldGroup: {
               marginBottom: isMobile ? '20px' : '25px'
             },
-            langSwitcher: {
+            langSwitcherDesktop: {
               position: 'fixed',
-              top: isMobile ? '10px' : '15px',
-              right: isMobile ? '10px' : '20px',
+              top: '15px',
+              right: '20px',
               zIndex: 1000
+            },
+            langSwitcherMobile: {
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '10px 15px',
+              background: colors.fondPrincipal,
+              borderBottom: `1px solid ${colors.bordure}`
             },
             langSelect: {
               background: 'rgba(0, 0, 0, 0.8)',
@@ -964,6 +971,25 @@
               touchAction: 'manipulation',
               fontFamily: "system-ui, -apple-system, sans-serif",
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+            },
+            langSelectMobile: {
+              background: 'transparent',
+              border: `1px solid ${colors.bordure}`,
+              borderRadius: '6px',
+              padding: '6px 28px 6px 10px',
+              fontSize: '13px',
+              color: colors.texte,
+              cursor: 'pointer',
+              outline: 'none',
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              appearance: 'none',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23E8728A' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 8px center',
+              minHeight: '36px',
+              touchAction: 'manipulation',
+              fontFamily: "system-ui, -apple-system, sans-serif"
             }
           };
 
@@ -1075,17 +1101,19 @@
 
           return (
             <div style={styles.container}>
-              {/* Sélecteur de langue en haut à droite */}
-              <div style={styles.langSwitcher}>
-                <select
-                  value={langue}
-                  onChange={(e) => handleLangueChange(e.target.value)}
-                  style={styles.langSelect}
-                >
-                  <option value="fr">🇫🇷 Français</option>
-                  <option value="en">🇬🇧 English</option>
-                </select>
-              </div>
+              {/* Sélecteur de langue - en haut à droite sur desktop, sous la bannière sur mobile */}
+              {!isMobile && (
+                <div style={styles.langSwitcherDesktop}>
+                  <select
+                    value={langue}
+                    onChange={(e) => handleLangueChange(e.target.value)}
+                    style={styles.langSelect}
+                  >
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                  </select>
+                </div>
+              )}
 
               {/* En-tête avec bannière cliquable */}
               <header style={styles.headerBanner}>
@@ -1097,6 +1125,20 @@
                   />
                 </a>
               </header>
+
+              {/* Sélecteur de langue sous la bannière sur mobile */}
+              {isMobile && (
+                <div style={styles.langSwitcherMobile}>
+                  <select
+                    value={langue}
+                    onChange={(e) => handleLangueChange(e.target.value)}
+                    style={styles.langSelectMobile}
+                  >
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                  </select>
+                </div>
+              )}
               
               {/* Barre sous-titre 
               <div style={styles.subtitleBar}>
